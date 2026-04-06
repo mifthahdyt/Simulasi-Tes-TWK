@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Try Out Biologi Pro - Miftha Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #27ae60;
+            --secondary: #2ecc71;
+            --accent: #f1c40f;
+            --bg: #f0f2f5;
+            --dark: #2c3e50;
+        }
+
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #1e8449, #27ae60, #58d68d);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container { width: 100%; max-width: 650px; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            display: none;
+            position: relative;
+            border: 2px solid white;
+        }
+
+        .card.active { display: block; animation: slideUp 0.4s ease-out; }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .timer-badge {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            background: var(--dark);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .fuel-badge {
+            background: var(--accent);
+            color: #7d6608;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-main { background: var(--primary); color: white; }
+        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(39,174,96,0.3); }
+
+        .option-container { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+        
+        .option-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 14px;
+            border-radius: 15px;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .option-btn:hover { border-color: var(--primary); background: #f0fdf4; }
+        .option-btn.selected { border-color: var(--primary); background: #e8f5e9; font-weight: 600; }
+        
+        /* Feedback Colors */
+        .option-btn.correct { background: #c6f6d5 !important; border-color: #27ae60 !important; color: #1a531b; }
+        .option-btn.wrong { background: #fed7d7 !important; border-color: #e74c3c !important; color: #822727; }
+
+        .explanation-box {
+            background: #fff9db;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: left;
+            border-left: 6px solid var(--accent);
+            margin-top: 15px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--secondary); width: 0%; transition: 0.3s; }
+        
+        .hidden { display: none; }
+        #evaluation-list { text-align: left; max-height: 250px; overflow-y: auto; background: #f8f9fa; border-radius: 15px; padding: 10px; margin-top: 15px; }
+        .eval-item { border-bottom: 1px solid #ddd; padding: 8px 0; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="screen-welcome" class="card active">
+            <div class="fuel-badge">🧬 BIOLOGI COMPLEX EDITION</div>
+            <h1>Halo, Miftha! 👋</h1>
+            <p>Siap hadapi 50 soal pilihan ganda & kompleks?</p>
+            <p style="font-size: 0.8rem; color: #666;">*Beberapa soal memiliki lebih dari satu jawaban benar.</p>
+            <button class="btn btn-main" onclick="startQuiz()">Mulai Sekarang 🚀</button>
+        </div>
+
+        <div id="screen-quiz" class="card">
+            <div class="timer-badge" id="display-timer">00:00</div>
+            <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: bold; color: #999; margin-bottom: 10px;">
+                <span id="type-label">TIPE: PILIHAN GANDA</span>
+                <span id="label-count">1/50</span>
+            </div>
+
+            <p id="text-question" style="font-weight: 600; text-align: left; font-size: 1.05rem; margin-top: 0;"></p>
+            
+            <div id="container-options" class="option-container"></div>
+            
+            <div id="feedback-area" class="hidden">
+                <div class="explanation-box">
+                    <strong>💡 Pembahasan:</strong>
+                    <p id="text-explanation" style="margin-top: 5px;"></p>
+                </div>
+                <button class="btn btn-main" onclick="nextQuestion()">Lanjut Soal Berikutnya ➡️</button>
+            </div>
+
+            <button id="btn-submit" class="btn btn-main hidden" onclick="checkAnswer()">Cek Jawaban ✅</button>
+        </div>
+
+        <div id="screen-result" class="card">
+            <h1>Hasil Akhir 🏆</h1>
+            <div style="font-size: 4rem; font-weight: 800; color: var(--primary);" id="final-score">0</div>
+            <p style="font-weight: bold;">Waktu: <span id="finish-time">00:00</span></p>
+            <div class="fuel-badge">BAHAN BAKAR SEMANGAT! 🔥</div>
+            <div id="evaluation-list"></div>
+            <button class="btn btn-main" onclick="location.reload()">Ulangi Try Out 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // Data soal revisi Miftha
+        const questions = [
+            { q: "Evolusi pada makhluk hidup terjadi pada tingkat…", opts: ["Individu dalam waktu singkat", "Populasi dalam beberapa generasi", "Organ dalam satu siklus hidup", "Sel dalam satu tubuh", "Jaringan dalam waktu cepat"], ans: [1], exp: "Evolusi terjadi pada tingkat populasi antargenerasi, bukan individu." },
+            { q: "Ciri-ciri utama proses evolusi adalah… (Pilih 3)", opts: ["Terjadi secara bertahap", "Dipengaruhi lingkungan", "Terjadi pada individu secara langsung", "Berkaitan dengan genetik", "Terjadi dalam waktu singkat"], ans: [0, 1, 3], exp: "Evolusi bertahap, dipengaruhi lingkungan, dan berkaitan dengan perubahan genetik." },
+            { q: "Adaptasi pada makhluk hidup bertujuan utama untuk…", opts: ["Mengubah bentuk tubuh secara instan", "Mempercepat pertumbuhan", "Bertahan hidup dan berkembang biak", "Menghindari perubahan lingkungan", "Menghentikan evolusi"], ans: [2], exp: "Inti adaptasi adalah meningkatkan peluang kelangsungan hidup dan reproduksi." },
+            { q: "Contoh adaptasi morfologi adalah… (Pilih 3)", opts: ["Daun kaktus berubah menjadi duri", "Produksi urin sedikit pada unta", "Paruh burung berbeda-beda", "Bulu tebal pada penguin", "Migrasi burung"], ans: [0, 2, 3], exp: "Morfologi adalah struktur fisik: duri kaktus, bentuk paruh, dan ketebalan bulu." },
+            { q: "Adaptasi fisiologi ditandai oleh…", opts: ["Perubahan bentuk tubuh luar", "Perubahan perilaku", "Perubahan fungsi organ tubuh", "Perubahan habitat", "Perubahan warna lingkungan"], ans: [2], exp: "Fisiologi berkaitan dengan fungsi kerja organ (kimiawi/metabolisme)." },
+            { q: "Ciri adaptasi fisiologi meliputi… (Pilih 3)", opts: ["Tidak tampak dari luar", "Berkaitan dengan metabolisme", "Mudah diamati langsung", "Berkaitan dengan fungsi organ", "Selalu permanen"], ans: [0, 1, 3], exp: "Fisiologi sering tak kasat mata karena bekerja di level fungsi organ dan metabolisme." },
+            { q: "Contoh adaptasi tingkah laku adalah…", opts: ["Batang kaktus tebal", "Keringat pada manusia", "Migrasi burung", "Paruh burung finch", "Lapisan lemak paus"], ans: [2], exp: "Migrasi adalah aksi/tindakan (perilaku) untuk bertahan hidup." },
+            { q: "Hewan nokturnal memiliki keuntungan berupa… (Pilih 4)", opts: ["Menghindari predator", "Mengurangi kompetisi makanan", "Menghindari panas siang", "Mendapat cahaya lebih banyak", "Menghemat energi"], ans: [0, 1, 2, 4], exp: "Aktif malam hari menghemat energi, menghindari panas, predator, dan kompetisi." },
+            { q: "Seleksi alam pertama kali dijelaskan oleh…", opts: ["Gregor Mendel", "Jean Lamarck", "Charles Darwin", "Alfred Wallace", "Louis Pasteur"], ans: [2], exp: "Charles Darwin adalah bapak teori seleksi alam." },
+            { q: "Tahapan seleksi alam meliputi… (Pilih 4)", opts: ["Adanya variasi", "Terjadi persaingan hidup", "Semua individu bertahan", "Individu unggul berkembang biak", "Sifat diwariskan"], ans: [0, 1, 3, 4], exp: "Seleksi butuh variasi, kompetisi, dan pewarisan sifat ke keturunan unggul." },
+            { q: "Konsep “survival of the fittest” berarti…", opts: ["Yang paling kuat selalu menang", "Yang paling cerdas bertahan", "Yang paling sesuai lingkungan bertahan", "Yang paling besar bertahan", "Yang paling cepat berkembang"], ans: [2], exp: "Fit berarti sesuai/cocok dengan kondisi lingkungan sekitar." },
+            { q: "Faktor yang memengaruhi seleksi alam adalah… (Pilih 3)", opts: ["Lingkungan", "Variasi genetik", "Kompetisi", "Mutasi saja", "Adaptasi"], ans: [0, 1, 2], exp: "Lingkungan, variasi, dan kompetisi adalah penggerak seleksi." },
+            { q: "Contoh seleksi alam akibat perubahan lingkungan adalah…", opts: ["Evolusi kuda", "Migrasi burung", "Kupu-kupu Biston betularia", "Jerapah Lamarck", "Embriologi"], ans: [2], exp: "Biston betularia berubah populasi karena jelaga revolusi industri." },
+            { q: "Pada kasus Biston betularia setelah revolusi industri… (Pilih 5)", opts: ["Pohon menjadi gelap", "Kupu cerah lebih terlihat", "Kupu gelap lebih tersamarkan", "Kupu cerah meningkat", "Terjadi perubahan populasi"], ans: [0, 1, 2, 4], exp: "Pohon gelap membuat kupu cerah dimangsa predator, populasi pun bergeser ke kupu gelap." },
+            { q: "Teori Darwin didasarkan pada pengamatan di…", opts: ["Afrika", "Amerika", "Kepulauan Galapagos", "Asia", "Antartika"], ans: [2], exp: "Kepulauan Galapagos adalah laboratorium alam bagi Darwin." },
+            { q: "Pengamatan Darwin terhadap burung finch menunjukkan… (Pilih 3)", opts: ["Variasi paruh", "Adaptasi terhadap makanan", "Tidak ada hubungan dengan lingkungan", "Seleksi alam terjadi", "Evolusi tidak terjadi"], ans: [0, 1, 3], exp: "Paruh Finch bervariasi sesuai jenis makanan di tiap pulau." },
+            { q: "Teori Lamarck menyatakan bahwa…", opts: ["Seleksi alam menentukan evolusi", "Mutasi acak menyebabkan evolusi", "Organ yang sering digunakan berkembang", "Gen menentukan sifat sepenuhnya", "Evolusi tidak terjadi"], ans: [2], exp: "Lamarck mencetuskan teori 'Use and Disuse'." },
+            { q: "Kelemahan teori Lamarck adalah… (Pilih 4)", opts: ["Tidak didukung genetika modern", "Sifat diperoleh tidak diwariskan", "Tidak ada bukti fosil", "Tidak menjelaskan variasi", "Tidak logis"], ans: [0, 1, 3, 4], exp: "Perubahan fisik akibat latihan (perolehan) tidak bisa diwariskan secara genetik." },
+            { q: "Fosil digunakan sebagai bukti evolusi karena…", opts: ["Menunjukkan kehidupan masa kini", "Menunjukkan perubahan bertahap", "Menunjukkan perilaku", "Menunjukkan fungsi organ", "Menunjukkan metabolisme"], ans: [1], exp: "Rekaman fosil menunjukkan transisi bentuk makhluk hidup dari masa ke masa." },
+            { q: "Ciri evolusi kuda adalah… (Pilih 4)", opts: ["Ukuran tubuh membesar", "Jumlah jari berkurang", "Gigi menyesuaikan makanan", "Habitat berubah", "Warna berubah drastis"], ans: [0, 1, 2, 3], exp: "Kuda berevolusi dari seukuran kucing dengan banyak jari menjadi besar dan satu jari." },
+            { q: "Variasi dalam populasi penting karena…", opts: ["Menghentikan seleksi alam", "Menjadi bahan evolusi", "Mengurangi adaptasi", "Menyebabkan kepunahan", "Menstabilkan lingkungan"], ans: [1], exp: "Tanpa variasi, seleksi alam tidak punya bahan untuk memilih." },
+            { q: "Contoh variasi individu adalah… (Pilih 3)", opts: ["Tinggi badan", "Warna kulit", "Bentuk wajah", "Jenis spesies", "Habitat"], ans: [0, 1, 2], exp: "Variasi individu terjadi dalam satu spesies yang sama." },
+            { q: "Embriologi perbandingan menunjukkan bahwa…", opts: ["All makhluk hidup berbeda", "Tidak ada hubungan evolusi", "Memiliki nenek moyang sama", "Evolusi tidak terjadi", "Adaptasi tidak penting"], ans: [2], exp: "Kemiripan embrio di tahap awal menunjukkan kekerabatan evolusi." },
+            { q: "Organ homolog memiliki ciri… (Pilih 3)", opts: ["Struktur sama", "Fungsi berbeda", "Asal-usul sama", "Fungsi sama", "Tidak berhubungan"], ans: [0, 1, 2], exp: "Struktur & asal sama (tangan vs sayap), tapi fungsi bisa berbeda." },
+            { q: "Contoh organ homolog adalah…", opts: ["Sayap burung & sayap serangga", "Tangan manusia & sayap kelelawar", "Mata manusia & mata serangga", "Insang & paru-paru", "Kulit & rambut"], ans: [1], exp: "Keduanya punya pola tulang yang sama (vertebrata)." },
+            { q: "Bukti evolusi dari fisiologi meliputi… (Pilih 3)", opts: ["Sistem enzim", "Respirasi", "Perilaku", "Struktur tulang", "Metabolisme"], ans: [0, 1, 4], exp: "Kemiripan proses kimia tubuh (enzim, respirasi, metabolisme) adalah bukti fisiologi." },
+            { q: "Urutan konsep evolusi yang benar adalah…", opts: ["Evolusi -> adaptasi -> seleksi", "Variasi -> adaptasi -> seleksi -> evolusi", "Seleksi -> variasi -> evolusi", "Adaptasi -> variasi -> evolusi", "Evolusi -> seleksi -> adaptasi"], ans: [1], exp: "Alur logis: Muncul variasi -> adaptasi -> diseleksi alam -> terjadi evolusi." },
+            { q: "Adaptasi morfologi pada kaktus meliputi… (Pilih 3)", opts: ["Daun menjadi duri", "Batang tebal", "Akar luas", "Menghasilkan urin sedikit", "Fotosintesis meningkat"], ans: [0, 1, 2], exp: "Struktur fisik kaktus didesain untuk hemat air di gurun." },
+            { q: "Fungsi keringat pada manusia adalah…", opts: ["Menyimpan air", "Mengurangi suhu tubuh", "Menambah energi", "Melindungi dari predator", "Menyimpan lemak"], ans: [1], exp: "Keringat adalah mekanisme pendinginan suhu tubuh (fisiologi)." },
+            { q: "Adaptasi pada ikan laut meliputi… (Pilih 3)", opts: ["Mengeluarkan sedikit urin", "Menjaga keseimbangan garam", "Menyerap air berlebih", "Menghindari predator", "Mengurangi metabolisme"], ans: [0, 1, 2], exp: "Ikan laut harus menghemat air karena lingkungan tinggi kadar garam (osmoregulasi)." },
+            { q: "Adaptasi tingkah laku laba-laba adalah…", opts: ["Mengubah warna tubuh", "Membuat jaring", "Mengeluarkan racun", "Mengubah bentuk kaki", "Menyimpan air"], ans: [1], exp: "Membuat jaring adalah perilaku insting untuk mencari makan." },
+            { q: "Faktor yang menyebabkan evolusi adalah… (Pilih 4)", opts: ["Variasi", "Seleksi alam", "Adaptasi", "Pewarisan sifat", "Lingkungan"], ans: [0, 1, 3, 4], exp: "Variasi, seleksi, warisan genetik, dan lingkungan adalah penyebab utama." },
+            { q: "Individu yang bertahan dalam seleksi alam adalah yang…", opts: ["Paling besar", "Paling cepat", "Paling sesuai lingkungan", "Paling kuat", "Paling tua"], ans: [2], exp: "Kesesuaian (fitness) adalah kunci bertahan hidup." },
+            { q: "Ciri adaptasi tingkah laku adalah… (Pilih 4)", opts: ["Berupa tindakan", "Dipengaruhi lingkungan", "Berkaitan fungsi organ", "Bersifat fleksibel", "Tidak terlihat secara langsung"], ans: [0, 1, 3, 4], exp: "Tingkah laku adalah aksi yang bisa berubah sesuai kondisi." },
+            { q: "Perubahan yang terjadi dalam evolusi bersifat…", opts: ["Cepat", "Mendadak", "Bertahap", "Tidak teratur", "Tidak pasti"], ans: [2], exp: "Evolusi bersifat gradual (lambat dan bertahap)." },
+            { q: "Contoh adaptasi fisiologi pada unta adalah… (Pilih 2)", opts: ["Menyimpan lemak", "Urin sedikit", "Punuk besar", "Hemat air", "Kaki panjang"], ans: [1, 3], exp: "Pengaturan urin dan penghematan air adalah proses internal (fisiologi)." },
+            { q: "Hubungan antara adaptasi dan evolusi adalah…", opts: ["Tidak berhubungan", "Adaptasi hasil evolusi", "Evolusi hasil adaptasi", "Adaptasi menyebabkan kepunahan", "Evolusi menghentikan adaptasi"], ans: [1], exp: "Adaptasi adalah wujud nyata dari proses evolusi yang berhasil." },
+            { q: "Peran lingkungan dalam evolusi adalah… (Pilih 3)", opts: ["Menyeleksi individu", "Menentukan adaptasi", "Mengubah gen secara langsung", "Mempengaruhi kelangsungan hidup", "Menentukan variasi"], ans: [0, 1, 3], exp: "Lingkungan berperan sebagai agen penyeleksi." },
+            { q: "Contoh adaptasi morfologi pada penguin adalah…", opts: ["Migrasi", "Lemak tebal", "Berkeringat", "Nokturnal", "Metabolisme tinggi"], ans: [1], exp: "Lapisan lemak adalah bagian dari struktur tubuh (morfologi)." },
+            { q: "Ciri teori Darwin adalah… (Pilih 4)", opts: ["Variasi dalam populasi", "Seleksi alam", "Pewarisan sifat", "Organ digunakan berkembang", "Perubahan bertahap"], ans: [0, 1, 2, 4], exp: "Darwin menekankan seleksi pada variasi yang sudah ada." },
+            { q: "Perubahan warna pada Biston betularia menunjukkan…", opts: ["Adaptasi fisiologi", "Seleksi alam", "Mutasi", "Embriologi", "Anatomi"], ans: [1], exp: "Ini adalah contoh seleksi alam yang paling terkenal." },
+            { q: "Bukti evolusi dari anatomi meliputi… (Pilih 3)", opts: ["Organ homolog", "Struktur tulang", "Embriologi", "Fosil", "Perbandingan organ"], ans: [0, 1, 4], exp: "Anatomi membandingkan bentuk fisik: homolog, tulang, dan organ." },
+            { q: "Tujuan utama adaptasi adalah…", opts: ["Mengubah gen", "Bertahan hidup", "Menghindari evolusi", "Mengubah lingkungan", "Menambah populasi"], ans: [1], exp: "Adaptasi dilakukan agar spesies tidak punah." },
+            { q: "Ciri-ciri fosil sebagai bukti evolusi adalah… (Pilih 4)", opts: ["Sisa makhluk hidup", "Membatu", "Tersimpan di lapisan bumi", "Menunjukkan perilaku", "Menunjukkan perubahan"], ans: [0, 1, 2, 4], exp: "Fosil menunjukkan perubahan fisik melalui sisa-sisa yang membatu." },
+            { q: "Perbedaan utama Darwin dan Lamarck adalah…", opts: ["Darwin tidak percaya evolusi", "Lamarck menggunakan seleksi alam", "Darwin menggunakan seleksi alam", "Lamarck menggunakan genetika", "Darwin menolak adaptasi"], ans: [2], exp: "Kunci perbedaan ada pada mekanisme Seleksi Alam." },
+            { q: "Contoh hubungan struktur dan fungsi adalah… (Pilih 4)", opts: ["Paruh burung", "Gigi kuda", "Sayap burung", "Warna kulit", "Bulu penguin"], ans: [0, 1, 2, 4], exp: "Bentuk fisik (paruh, gigi, sayap) mendukung tugas tertentu (makan, terbang)." },
+            { q: "Makhluk hidup yang tidak mampu beradaptasi akan…", opts: ["Berkembang", "Berubah cepat", "Punah", "Menguat", "Bermigrasi"], ans: [2], exp: "Gagal adaptasi = Kepunahan." },
+            { q: "Proses yang terjadi dalam seleksi alam adalah… (Pilih 5)", opts: ["Kompetisi", "Adaptasi", "Pewarisan", "Kepunahan", "Variasi"], ans: [0, 1, 2, 3, 4], exp: "Semua faktor ini terlibat dalam drama seleksi alam." },
+            { q: "Contoh adaptasi untuk menghindari predator adalah…", opts: ["Fotosintesis", "Kamuflase", "Respirasi", "Ekskresi", "Reproduksi"], ans: [1], exp: "Kamuflase (morfologi/tingkah laku) adalah cara menghindari pemangsa." },
+            { q: "Pesan Miftha hari ini untuk teman-teman adalah… (Pilih 4)", opts: ["Adaptasi terjadi cepat", "Evolusi terjadi lama", "Adaptasi pada individu", "Evolusi pada populasi", "Semangat"], ans: [0, 1, 2, 3], exp: "Evolusi dan adaptasi adalah kunci kehidupan. Tetap Semangat!" }
+        ];
+
+        let currentIdx = 0;
+        let score = 0;
+        let selectedIndices = [];
+        let wrongAnswers = [];
+        let timerInterval;
+        let seconds = 0;
+
+        function startQuiz() {
+            document.getElementById('screen-welcome').classList.remove('active');
+            document.getElementById('screen-quiz').classList.add('active');
+            startTimer();
+            loadQuestion();
+        }
+
+        function startTimer() {
+            seconds = 0;
+            timerInterval = setInterval(() => {
+                seconds++;
+                document.getElementById('display-timer').innerText = formatTime(seconds);
+            }, 1000);
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, '0');
+            const s = (sec % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function loadQuestion() {
+            const data = questions[currentIdx];
+            selectedIndices = [];
+            
+            document.getElementById('label-count').innerText = `${currentIdx + 1}/50`;
+            document.getElementById('text-question').innerText = data.q;
+            document.getElementById('progress-fill').style.width = `${((currentIdx + 1)/50)*100}%`;
+            
+            // Label Tipe Soal
+            const isComplex = data.ans.length > 1;
+            document.getElementById('type-label').innerText = isComplex ? "TIPE: KOMPLEKS (PILIH >1)" : "TIPE: PILIHAN GANDA";
+            document.getElementById('type-label').style.color = isComplex ? "#e67e22" : "#999";
+
+            const container = document.getElementById('container-options');
+            container.innerHTML = '';
+            
+            data.opts.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<input type="${isComplex ? 'checkbox' : 'radio'}" name="opt" id="opt${i}"> <span>${opt}</span>`;
+                btn.onclick = () => toggleOption(i, isComplex);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('feedback-area').classList.add('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+        }
+
+        function toggleOption(index, isComplex) {
+            if (!isComplex) {
+                selectedIndices = [index];
+            } else {
+                if (selectedIndices.includes(index)) {
+                    selectedIndices = selectedIndices.filter(i => i !== index);
+                } else {
+                    selectedIndices.push(index);
+                }
+            }
+            
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach((btn, i) => {
+                const input = btn.querySelector('input');
+                const isSelected = selectedIndices.includes(i);
+                btn.classList.toggle('selected', isSelected);
+                input.checked = isSelected;
+            });
+        }
+
+        function checkAnswer() {
+            const data = questions[currentIdx];
+            if (selectedIndices.length === 0) return alert("Pilih jawaban dulu!");
+
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(btn => btn.onclick = null); // Disable clicks
+
+            // Logika cek jawaban kompleks
+            const isCorrect = (selectedIndices.length === data.ans.length) && 
+                              selectedIndices.every(val => data.ans.includes(val));
+
+            if (isCorrect) {
+                score += 2;
+                selectedIndices.forEach(idx => btns[idx].classList.add('correct'));
+            } else {
+                // Tunjukkan yang salah dan yang benar
+                selectedIndices.forEach(idx => {
+                    if (!data.ans.includes(idx)) btns[idx].classList.add('wrong');
+                });
+                data.ans.forEach(idx => btns[idx].classList.add('correct'));
+                
+                wrongAnswers.push({ 
+                    q: data.q, 
+                    user: selectedIndices.map(i => data.opts[i]).join(", "), 
+                    correct: data.ans.map(i => data.opts[i]).join(", ") 
+                });
+            }
+
+            document.getElementById('text-explanation').innerText = data.exp;
+            document.getElementById('feedback-area').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.add('hidden');
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            if (currentIdx < 50) loadQuestion();
+            else finishQuiz();
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            document.getElementById('screen-quiz').classList.remove('active');
+            document.getElementById('screen-result').classList.add('active');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('finish-time').innerText = formatTime(seconds);
+
+            const list = document.getElementById('evaluation-list');
+            list.innerHTML = "";
+            if (wrongAnswers.length === 0) {
+                list.innerHTML = "<p style='color:green; text-align:center;'>PERFECT! Kamu menguasai Evolusi & Adaptasi! 🌿</p>";
+            } else {
+                list.innerHTML = "<strong>Review Jawaban:</strong>";
+                wrongAnswers.forEach(w => {
+                    list.innerHTML += `<div class="eval-item"><b>${w.q}</b><br><span style="color:red">Kamu: ${w.user}</span><br><span style="color:green">Kunci: ${w.correct}</span></div>`;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
