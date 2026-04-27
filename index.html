@@ -3,84 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi CAT - Sejarah Kebangsaan</title>
+    <title>CAT SYSTEM - Sejarah Kebangsaan Indonesia</title>
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #e74c3c;
-            --success: #27ae60;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
+            --primary: #1a237e;
+            --secondary: #c62828;
+            --accent: #2e7d32;
+            --bg: #f5f5f5;
+            --white: #ffffff;
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; }
-        #intro-screen, #result-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 20px; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; color: #333; }
+
+        /* Layar Utama & Hasil */
+        #intro-screen, #result-screen { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            min-height: 100vh; text-align: center; padding: 20px; 
+        }
+
+        /* Layar Ujian */
         #exam-screen { display: none; flex-direction: column; height: 100vh; }
         
-        header { background: var(--primary); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
-        .timer { font-size: 1.5rem; font-weight: bold; background: white; color: var(--secondary); padding: 5px 15px; border-radius: 5px; }
+        header { 
+            background: var(--primary); color: white; padding: 15px 30px; 
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
 
-        .main-container { display: flex; flex: 1; overflow: hidden; padding: 20px; gap: 20px; }
-        .question-area { flex: 3; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-y: auto; }
-        .nav-sidebar { flex: 1; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-y: auto; }
+        .timer-box { 
+            font-size: 1.4rem; font-weight: bold; background: var(--white); 
+            color: var(--secondary); padding: 8px 20px; border-radius: 4px; 
+        }
 
-        .option { display: block; padding: 15px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .option:hover { background: #f9f9f9; border-color: var(--primary); }
-        .option.selected { background: #d5dbdb; border-color: var(--primary); font-weight: bold; }
+        .main-content { display: flex; flex: 1; overflow: hidden; padding: 20px; gap: 20px; }
 
-        .nav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .nav-item { padding: 10px; border: 1px solid #ccc; text-align: center; cursor: pointer; border-radius: 4px; font-size: 0.9rem; }
-        .nav-item.active { border: 2px solid var(--primary); font-weight: bold; }
-        .nav-item.answered { background: var(--success); color: white; border-color: var(--success); }
+        /* Area Soal */
+        .question-card { 
+            flex: 3; background: var(--white); padding: 30px; border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow-y: auto; display: flex; flex-direction: column;
+        }
 
-        .btn { padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-start { background: var(--success); color: white; font-size: 1.2rem; }
-        .btn-nav { background: var(--primary); color: white; }
+        .q-text { font-size: 1.2rem; line-height: 1.6; margin-bottom: 25px; font-weight: 500; }
+
+        .option { 
+            display: flex; align-items: center; padding: 15px; margin-bottom: 12px; 
+            border: 2px solid #eceff1; border-radius: 10px; cursor: pointer; transition: all 0.2s;
+        }
+        .option:hover { background: #f0f4c3; border-color: #dce775; }
+        .option.selected { background: #e8f5e9; border-color: var(--accent); color: var(--accent); font-weight: bold; }
+        .opt-label { font-weight: bold; margin-right: 15px; width: 30px; }
+
+        /* Sidebar Navigasi */
+        .sidebar { 
+            flex: 1; background: var(--white); padding: 20px; border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow-y: auto; 
+        }
+
+        .nav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .nav-btn { 
+            aspect-ratio: 1; border: 1px solid #ccc; display: flex; align-items: center; 
+            justify-content: center; cursor: pointer; border-radius: 4px; font-weight: bold; transition: 0.3s;
+        }
+        .nav-btn.current { border: 3px solid var(--primary); background: #e3f2fd; }
+        .nav-btn.filled { background: var(--accent); color: white; border-color: var(--accent); }
+
+        /* Footer */
+        .controls { margin-top: auto; padding-top: 20px; display: flex; justify-content: space-between; }
+        .btn { padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        .btn-prev { background: #90a4ae; color: white; }
+        .btn-next { background: var(--primary); color: white; }
         .btn-finish { background: var(--secondary); color: white; }
+        .btn-start { background: var(--accent); color: white; padding: 15px 40px; font-size: 1.2rem; }
 
-        .footer-nav { margin-top: 20px; display: flex; justify-content: space-between; }
+        @media (max-width: 768px) {
+            .main-content { flex-direction: column; }
+            .sidebar { order: -1; flex: none; height: 180px; }
+        }
     </style>
 </head>
 <body>
 
 <div id="intro-screen">
-    <h1>Simulasi CAT: Sejarah Kebangsaan Indonesia</h1>
-    <p>Jumlah Soal: 50 | Waktu: 50 Menit</p>
-    <button class="btn btn-start" onclick="startExam()">Mulai Ujian</button>
+    <h1 style="color: var(--primary);">SIMULASI CAT CPNS</h1>
+    <h3>Materi: Sejarah Kebangsaan Indonesia</h3>
+    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #ddd;">
+        <p>⏱ <strong>Waktu:</strong> 50 Menit</p>
+        <p>📝 <strong>Jumlah:</strong> 50 Soal</p>
+        <p>✅ <strong>Passing Grade:</strong> 65 (Estimasi)</p>
+    </div>
+    <button class="btn btn-start" onclick="startUjian()">MULAI SIMULASI</button>
 </div>
 
 <div id="exam-screen">
     <header>
-        <div><strong>CAT SYSTEM - TWK</strong></div>
-        <div class="timer" id="timer">50:00</div>
+        <div style="font-size: 1.2rem; font-weight: bold;">COMPUTER ASSISTED TEST</div>
+        <div class="timer-box" id="display-timer">50:00</div>
     </header>
-    <div class="main-container">
-        <div class="question-area">
-            <h3 id="q-number">Soal Nomor 1</h3>
-            <p id="q-text" style="font-size: 1.1rem; margin-bottom: 20px;"></p>
-            <div id="options-container"></div>
-            <div class="footer-nav">
-                <button class="btn btn-nav" onclick="prevQuestion()">Sebelumnya</button>
-                <button class="btn btn-finish" onclick="confirmFinish()">Selesai</button>
-                <button class="btn btn-nav" onclick="nextQuestion()">Selanjutnya</button>
+    
+    <div class="main-content">
+        <div class="question-card">
+            <h4 id="display-q-num" style="color: var(--primary); margin: 0 0 10px 0;">Soal Nomor 1</h4>
+            <div id="display-q-text" class="q-text">Loading soal...</div>
+            <div id="options-list"></div>
+            
+            <div class="controls">
+                <button class="btn btn-prev" onclick="moveQ(-1)">SEBELUMNYA</button>
+                <button class="btn btn-finish" onclick="checkFinish()">SELESAI</button>
+                <button class="btn btn-next" onclick="moveQ(1)">SELANJUTNYA</button>
             </div>
         </div>
-        <div class="nav-sidebar">
-            <h4>Navigasi Soal</h4>
+
+        <div class="sidebar">
+            <h4 style="margin-top:0">Navigasi Soal</h4>
             <div class="nav-grid" id="nav-grid"></div>
+            <div style="margin-top: 20px; font-size: 0.8rem;">
+                <p><span style="color: var(--accent)">■</span> Terjawab</p>
+                <p><span style="color: #ccc">□</span> Belum Terjawab</p>
+            </div>
         </div>
     </div>
 </div>
 
 <div id="result-screen" style="display:none;">
-    <h1>Hasil Ujian Anda</h1>
-    <h2 id="score-text" style="font-size: 4rem; color: var(--success);">0</h2>
-    <p id="stats-text"></p>
-    <button class="btn btn-nav" onclick="location.reload()">Ulangi Simulasi</button>
+    <h1 id="result-title">Hasil Ujian</h1>
+    <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="margin:0; font-size: 1.2rem;">SKOR AKHIR</h2>
+        <div id="final-score" style="font-size: 5rem; font-weight: bold; color: var(--primary);">0</div>
+        <p id="final-stats" style="font-size: 1.1rem; color: #555;"></p>
+    </div>
+    <button class="btn btn-next" style="margin-top: 30px;" onclick="location.reload()">KEMBALI KE BERANDA</button>
 </div>
 
 <script>
-    const questions = [
+    // DATA SOAL (50 SOAL)
+    const bankSoal = [
         { q: "Sejarah kebangsaan Indonesia pada dasarnya membahas tentang ....", o: ["perkembangan ekonomi Indonesia setelah merdeka", "perjuangan bangsa Indonesia dari masa penjajahan hingga kemerdekaan", "kehidupan kerajaan-kerajaan Nusantara semata", "sistem pemerintahan modern Indonesia", "hubungan dagang Indonesia dengan negara asing"], a: 1 },
         { q: "Berikut ini yang termasuk faktor internal lahirnya nasionalisme Indonesia adalah ....", o: ["kemenangan Jepang atas Rusia", "masuknya ide demokrasi dari Barat", "penderitaan akibat penjajahan", "pengaruh pergerakan nasional negara lain", "berkembangnya hubungan internasional"], a: 2 },
         { q: "Organisasi yang menandai Kebangkitan Nasional tahun 1908 adalah ....", o: ["Sarekat Islam", "Indische Partij", "Budi Utomo", "Muhammadiyah", "PNI"], a: 2 },
@@ -133,106 +190,122 @@
         { q: "Urutan timeline yang paling tepat berdasarkan materi adalah ....", o: ["1928 → 1908 → 1945", "1908 → 1928 → 1945", "1945 → 1928 → 1908", "1908 → 1945 → 1928", "1945 → 1908 → 1928"], a: 1 }
     ];
 
-    let currentQuestion = 0;
-    let answers = new Array(questions.length).fill(null);
-    let timeLeft = 50 * 60;
-    let timerInterval;
+    let currentIdx = 0;
+    let userAnswers = new Array(bankSoal.length).fill(null);
+    let waktu = 50 * 60; // 50 menit
+    let timerId;
 
-    function startExam() {
+    // FUNGSI UTAMA
+    function startUjian() {
         document.getElementById('intro-screen').style.display = 'none';
         document.getElementById('exam-screen').style.display = 'flex';
-        loadQuestion();
-        createNavGrid();
-        startTimer();
+        renderNav();
+        loadSoal();
+        mulaiTimer();
     }
 
-    function loadQuestion() {
-        const q = questions[currentQuestion];
-        document.getElementById('q-number').innerText = `Soal Nomor ${currentQuestion + 1}`;
-        document.getElementById('q-text').innerText = q.q;
+    function loadSoal() {
+        const data = bankSoal[currentIdx];
+        document.getElementById('display-q-num').innerText = `Soal Nomor ${currentIdx + 1}`;
+        document.getElementById('display-q-text').innerText = data.q;
         
-        const container = document.getElementById('options-container');
-        container.innerHTML = '';
+        const list = document.getElementById('options-list');
+        list.innerHTML = '';
         
-        q.o.forEach((opt, index) => {
-            const label = String.fromCharCode(65 + index);
+        data.o.forEach((teks, idx) => {
+            const char = String.fromCharCode(65 + idx);
             const div = document.createElement('div');
-            div.className = `option ${answers[currentQuestion] === index ? 'selected' : ''}`;
-            div.innerHTML = `<strong>${label}.</strong> ${opt}`;
-            div.onclick = () => selectOption(index);
-            container.appendChild(div);
+            div.className = `option ${userAnswers[currentIdx] === idx ? 'selected' : ''}`;
+            div.innerHTML = `<span class="opt-label">${char}.</span> ${teks}`;
+            div.onclick = () => simpanJawaban(idx);
+            list.appendChild(div);
         });
-        updateNavActive();
+
+        updateNavUI();
     }
 
-    function selectOption(index) {
-        answers[currentQuestion] = index;
-        loadQuestion();
-        updateNavAnswered();
+    function simpanJawaban(idx) {
+        userAnswers[currentIdx] = idx;
+        loadSoal(); // Refresh tampilan opsi
     }
 
-    function nextQuestion() {
-        if (currentQuestion < questions.length - 1) {
-            currentQuestion++;
-            loadQuestion();
+    function moveQ(step) {
+        const target = currentIdx + step;
+        if (target >= 0 && target < bankSoal.length) {
+            currentIdx = target;
+            loadSoal();
         }
     }
 
-    function prevQuestion() {
-        if (currentQuestion > 0) {
-            currentQuestion--;
-            loadQuestion();
-        }
-    }
-
-    function createNavGrid() {
+    // NAVIGASI SIDEBAR
+    function renderNav() {
         const grid = document.getElementById('nav-grid');
-        questions.forEach((_, i) => {
-            const item = document.createElement('div');
-            item.className = 'nav-item';
-            item.id = `nav-${i}`;
-            item.innerText = i + 1;
-            item.onclick = () => { currentQuestion = i; loadQuestion(); };
-            grid.appendChild(item);
+        grid.innerHTML = '';
+        bankSoal.forEach((_, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'nav-btn';
+            btn.id = `nav-item-${i}`;
+            btn.innerText = i + 1;
+            btn.onclick = () => { currentIdx = i; loadSoal(); };
+            grid.appendChild(btn);
         });
     }
 
-    function updateNavActive() {
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        document.getElementById(`nav-${currentQuestion}`).classList.add('active');
+    function updateNavUI() {
+        bankSoal.forEach((_, i) => {
+            const el = document.getElementById(`nav-item-${i}`);
+            el.classList.remove('current', 'filled');
+            if (i === currentIdx) el.classList.add('current');
+            if (userAnswers[i] !== null) el.classList.add('filled');
+        });
     }
 
-    function updateNavAnswered() {
-        if (answers[currentQuestion] !== null) {
-            document.getElementById(`nav-${currentQuestion}`).classList.add('answered');
-        }
-    }
-
-    function startTimer() {
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            const min = Math.floor(timeLeft / 60);
-            const sec = timeLeft % 60;
-            document.getElementById('timer').innerText = `${min}:${sec < 10 ? '0' + sec : sec}`;
-            if (timeLeft <= 0) finishExam();
+    // TIMER
+    function mulaiTimer() {
+        timerId = setInterval(() => {
+            waktu--;
+            let m = Math.floor(waktu / 60);
+            let s = waktu % 60;
+            document.getElementById('display-timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+            
+            if (waktu <= 0) hitungHasil();
         }, 1000);
     }
 
-    function confirmFinish() {
-        if (confirm("Yakin ingin menyelesaikan ujian?")) finishExam();
+    // FINISH
+    function checkFinish() {
+        const belum = userAnswers.filter(a => a === null).length;
+        let pesan = "Apakah Anda yakin ingin mengakhiri ujian?";
+        if (belum > 0) pesan = `Ada ${belum} soal belum dijawab. Tetap selesai?`;
+        
+        if (confirm(pesan)) hitungHasil();
     }
 
-    function finishExam() {
-        clearInterval(timerInterval);
-        let score = 0;
-        answers.forEach((ans, i) => {
-            if (ans === questions[i].a) score += 2; // Nilai max 100
+    function hitungHasil() {
+        clearInterval(timerId);
+        let skor = 0;
+        let benar = 0;
+
+        userAnswers.forEach((ans, i) => {
+            if (ans === bankSoal[i].a) {
+                benar++;
+                skor += 2; // Per soal poin 2, total 100
+            }
         });
 
         document.getElementById('exam-screen').style.display = 'none';
         document.getElementById('result-screen').style.display = 'flex';
-        document.getElementById('score-text').innerText = score;
-        document.getElementById('stats-text').innerText = `Anda menjawab benar ${score/2} dari 50 soal.`;
+        document.getElementById('final-score').innerText = skor;
+        document.getElementById('final-stats').innerText = `Benar: ${benar} | Salah: ${bankSoal.length - benar}`;
+        
+        // Ubah warna skor berdasarkan hasil
+        if (skor >= 65) {
+            document.getElementById('final-score').style.color = 'var(--accent)';
+            document.getElementById('result-title').innerText = "SELAMAT! ANDA LULUS";
+        } else {
+            document.getElementById('final-score').style.color = 'var(--secondary)';
+            document.getElementById('result-title').innerText = "TETAP SEMANGAT, COBA LAGI";
+        }
     }
 </script>
 
